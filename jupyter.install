@@ -1,0 +1,54 @@
+#!/usr/bin/bash
+
+# Author: Ankush Bhagat
+# Version: 1.0 (stable)
+
+# Tested successful on Termux (Android: 10, 11, 12, 13)
+
+source jupyter.logo
+
+function status() {
+echo -e "\nJupyter and other requirements ${1}\nYou can run \e[94mJupyter\e[0m using command: \e[92mjupyter-notebook\e[0m"
+}
+
+apt update
+echo
+
+if [[ $(uname -o) == "Android" ]]
+then
+req_pkg=('python' 'libzmq')
+req_pip=('wheel' 'cPython' 'pyzmq' 'jupyter')
+
+for i in ${req_pkg[@]}
+do
+printf "\r\e[0;1m[\e[94;1mChecking package\e[0;1m]: ${i}"
+if [[ $(dpkg -l | grep "${i}" | echo $?) != 0 ]]
+then
+apt install ${i} -y
+else
+echo -e " : \e[92mfound\e[0m"
+fi
+done
+
+echo
+
+for p in ${req_pip[@]}
+do
+printf "\r\e[0;1m[\e[94;1mChecking pip module\e[0;1m]: ${p}"
+if [[ $(pip show ${p} | grep Name | cut -c 7-) != ${p} ]]
+then
+#echo -e " : \e[91mnot found installing...\e[0m"
+pip install ${p}
+else
+((n++))
+echo -e " : \e[92mfound\e[0m"
+fi
+done
+fi
+
+if [[ ${n} == 4 ]]
+then
+status "installed successfully."
+else
+status "already installed."
+fi
